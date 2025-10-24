@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Our firm faces foreign exchange exposure on a €12,500,000 receivable due in one year. At the current spot rate of 1.1607 EURUSD, this translates to approximately $14.5 million. However, euro depreciation could significantly reduce our USD proceeds. I recommend we evaluate three hedging families—forward contracts, money market hedges, and options—to mitigate this risk. Preliminary analysis suggests a forward contract may provide the most cost-effective protection, though options offer greater flexibility if euro strengthening is anticipated. In Stages 2–3, I will build a quantitative model to compare these strategies and recommend an optimal hedge.
+Our firm faces foreign exchange exposure on a €12,500,000 receivable due in one year. At the current spot rate of 1.1607 EURUSD, this translates to approximately $14.5 million. However, euro depreciation could significantly reduce our USD proceeds. I recommend we evaluate three hedging families forward contracts, money market hedges, and options to mitigate this risk. Preliminary analysis suggests a forward contract may provide the most cost-effective protection, though options offer greater flexibility if euro strengthening is anticipated. In Stages 2–3, I will build a quantitative model to compare these strategies and recommend an optimal hedge.
 
 ---
 
@@ -67,7 +67,7 @@ Borrow EUR today at the euro interest rate (2.15%), convert to USD at spot (1.16
 ---
 
 #### **3. Currency Options (Put Option on EUR)**
-Purchase a EUR put option with strike price at or near current forward rate (K = 1.0910), premium = $0.017 per EUR.
+Purchase a EUR put option with strike price at current spot rate (K = 1.1607), premium = $0.017 per EUR.
 
 **Pros:**
 - Provides downside protection while preserving upside participation
@@ -76,7 +76,7 @@ Purchase a EUR put option with strike price at or near current forward rate (K =
 
 **Cons:**
 - Upfront premium cost of $212,500 (€12.5M × $0.017)
-- Reduces effective proceeds by premium amount
+- Reduces net effective proceeds
 - More expensive than forward if euro depreciates as expected
 
 ---
@@ -108,7 +108,10 @@ Purchase a EUR put option with strike price at or near current forward rate (K =
 
 ## References
 
-- Federal Reserve H.15 Selected Interest Rates (October 23, 2025)
-- European Central Bank Monetary Policy Decisions (September 11, 2025)
-- Bloomberg FX Forward Quotes (October 23, 2025)
-- FASB ASC Topic 815: Derivatives and Hedging (accounting guidance)
+Board of Governors of the Federal Reserve System. (2025, October 23). *Selected interest rates (H.15)*. https://www.federalreserve.gov/releases/h15/
+
+European Central Bank. (2025, September 11). *Monetary policy decisions*. https://www.ecb.europa.eu/press/
+
+Financial Accounting Standards Board. (2023). *Accounting Standards Codification Topic 815: Derivatives and hedging*. FASB.
+
+Bloomberg L.P. (2025, October 23). *Foreign exchange forward rates* [Data set]. Bloomberg Terminal.
