@@ -2,11 +2,13 @@
 
 **Created by:** [Kristy Chung]  
 **Date Created:** November 6, 2025  
+**Date Updated:** November 6, 2025  
 **Version:** 1.0  
 **LLM Used:** Claude Sonnet 4.5 (specification structure)
 
 **Role:** Treasury Analyst  
-**Audience:** CFO and Director of Treasury
+**Audience:** CFO and Director of Treasury  
+**Due Date:** November 7, 2025
 
 **Purpose:** Provide a professional, quantitative specification outlining the analytical structure for evaluating FX hedging alternatives for a EUR 5,000,000 receivable due March 15, 2026.
 
