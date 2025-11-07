@@ -70,32 +70,88 @@ These assumptions allow for analytical clarity while noting that real-world impl
 The analysis follows a four-strategy comparison structure, each with distinct logic:
 
 ### **4.1 Forward Contract Hedge**
-1. Calculate forward rate using interest rate parity: multiply spot rate by the ratio of (1 + USD rate × days/360) to (1 + EUR rate × days/360)
-2. Compute locked-in USD proceeds by multiplying EUR amount by forward rate
-3. Compare locked proceeds against various future spot scenarios to illustrate certainty benefit
-4. Identify opportunity cost if EUR strengthens beyond the forward rate
+
+**Step 1:** Calculate the forward exchange rate using interest rate parity
+- Multiply current spot rate by (1 + r_USD × days/360)
+- Divide by (1 + r_EUR × days/360)
+- This gives the no-arbitrage forward rate for the 129-day horizon
+
+**Step 2:** Lock in USD proceeds
+- Multiply EUR receivable amount by the calculated forward rate
+- This represents guaranteed USD proceeds regardless of future spot rate
+
+**Step 3:** Compare against spot scenarios
+- Calculate what USD proceeds would be at various future spot rates
+- Identify the "opportunity cost" if EUR strengthens beyond forward rate
+
+**Step 4:** Document certainty benefit
+- Forward eliminates all FX risk but also removes upside potential
 
 ### **4.2 Money Market Hedge**
-1. Determine present value of EUR receivable by discounting at EUR interest rate for 129 days
-2. Borrow this PV amount in EUR at the EUR interest rate
-3. Convert borrowed EUR to USD immediately at current spot rate
-4. Invest converted USD at USD interest rate for 129 days
-5. At maturity: incoming EUR receivable repays EUR loan (principal plus interest); USD investment matures
-6. Calculate net USD proceeds and verify alignment with forward hedge (via IRP)
+
+**Step 1:** Calculate present value of EUR receivable
+- Discount EUR 5,000,000 using EUR interest rate over 129 days
+- Formula: EUR_AMT / (1 + r_EUR × days/360)
+- This determines how much EUR to borrow today
+
+**Step 2:** Borrow EUR today
+- Borrow the PV amount calculated in Step 1 at EUR interest rate
+- At maturity, the EUR 5,000,000 receivable will exactly repay this loan
+
+**Step 3:** Convert borrowed EUR to USD immediately
+- Exchange the borrowed EUR at current spot rate (S0)
+- This locks in today's exchange rate for the synthetic hedge
+
+**Step 4:** Invest USD proceeds
+- Invest converted USD at USD interest rate for 129 days
+- Calculate maturity value: USD_invested × (1 + r_USD × days/360)
+
+**Step 5:** Verify at maturity
+- EUR receivable pays off EUR loan (principal + interest = EUR 5,000,000)
+- USD investment matures to final proceeds
+- Confirm this matches forward hedge outcome (validates IRP)
 
 ### **4.3 Currency Option Hedge**
-1. Purchase at-the-money EUR call option with strike equal to current spot rate (1.0850)
-2. Pay upfront premium of 0.0180 USD per EUR (total premium = EUR amount × unit premium)
-3. At maturity, evaluate option intrinsic value based on realized spot rate:
-   - If spot > strike: exercise option, convert EUR at strike rate
-   - If spot ≤ strike: let option expire, convert EUR at market spot rate (capture upside)
-4. Calculate net USD proceeds as conversion proceeds minus premium paid at initiation
-5. Determine breakeven spot rate where option hedge equals unhedged outcome
+
+**Step 1:** Purchase EUR call option (USD put equivalent)
+- Strike price: 1.0850 (at-the-money, equal to current spot)
+- Premium: 0.0180 USD per EUR
+- Total premium cost: EUR 5,000,000 × 0.0180 = USD 90,000
+
+**Step 2:** Pay premium upfront
+- Premium paid today reduces net proceeds regardless of outcome
+- This is the "insurance cost" for downside protection
+
+**Step 3:** Evaluate at maturity based on realized spot rate (S_T)
+- **If S_T < 1.0850 (EUR weakens):** Exercise option
+  - Convert EUR at protected strike rate of 1.0850
+  - USD proceeds = EUR 5,000,000 × 1.0850 = USD 5,425,000
+- **If S_T ≥ 1.0850 (EUR strengthens):** Let option expire
+  - Convert EUR at favorable market spot rate S_T
+  - USD proceeds = EUR 5,000,000 × S_T
+  - Capture upside while protected on downside
+
+**Step 4:** Calculate net proceeds
+- Subtract upfront premium from conversion proceeds
+- Net USD = Gross conversion proceeds - USD 90,000
+
+**Step 5:** Determine breakeven spot rate
+- Find S_T where option hedge net proceeds equal unhedged proceeds
+- Breakeven occurs when upside gain offsets premium cost
 
 ### **4.4 Unhedged Baseline**
-1. Convert EUR receivable at prevailing spot rate on March 15, 2026
-2. USD proceeds equal EUR amount multiplied by future spot rate
-3. Serves as performance benchmark and illustrates pure FX risk exposure
+
+**Step 1:** Wait until payment date (March 15, 2026)
+- Take no hedging action today
+- Accept full exposure to spot rate movements
+
+**Step 2:** Convert at realized spot rate
+- USD proceeds = EUR 5,000,000 × S_T (whatever the future spot rate is)
+- Maximum upside potential but also maximum downside risk
+
+**Step 3:** Use as benchmark
+- Compare all hedged outcomes against this unhedged result
+- Quantifies the value (or cost) of each hedging strategy
 
 **Sequencing note:** All calculations reference the same base inputs. Option and money market hedges are compared against the forward contract to assess relative value and trade-offs.
 
