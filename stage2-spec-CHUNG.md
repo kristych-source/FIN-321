@@ -1,144 +1,183 @@
-## FX Hedge Model Technical Specification
+## EUR Receivable FX Hedge – Technical Specification
 
-**Prepared by:** [Kristy Chung]  
-**Date:** November 6, 2025  
-**Subject:** EUR Receivable Hedge Analysis – Technical Specification
+**Created by:** [Kristy Chung]  
+**Date Created:** November 6, 2025  
+**Version:** 1.0  
+**LLM Used:** Claude Sonnet 4.5 (specification structure)
+
+**Role:** Treasury Analyst  
+**Audience:** CFO and Director of Treasury
+
+**Purpose:** Provide a professional, quantitative specification outlining the analytical structure for evaluating FX hedging alternatives for a EUR 5,000,000 receivable due March 15, 2026.
 
 ---
 
 ## 1. Problem Statement
 
-Our firm will receive **EUR 5,000,000** on **March 15, 2026** (129 days forward) as payment for delivered consulting services. This exposure creates FX risk: if the EUR/USD exchange rate depreciates between today and the payment date, the dollar value of our receivable will decline. Management seeks to evaluate three hedging strategies—forward contract, money market hedge, and currency option—to determine the optimal approach for locking in value while considering cost, flexibility, and downside protection.
+Our firm will receive **EUR 5,000,000** on **March 15, 2026** (129 days forward) as payment for delivered consulting services. This creates foreign exchange exposure: if the EUR/USD exchange rate depreciates between now and the payment date, the dollar value of our receivable will decline, potentially reducing realized revenue by hundreds of thousands of dollars.
 
-The model must quantify expected USD proceeds, breakeven exchange rates, and net outcomes across a range of future spot rates to support a data-driven hedging decision.
+**Exposure type:** EUR-denominated receivable  
+**Time horizon:** 129 days (approximately 4.3 months)  
+**Objective:** Evaluate three hedging strategies to determine the optimal approach for protecting USD value while considering cost, flexibility, and potential upside participation  
+**Decision context:** Corporate treasury seeks a data-driven recommendation to present to the CFO for approval
+
+This specification outlines the analytical framework for quantifying, comparing, and visualizing alternative hedging strategies—forward contract, money market hedge, and currency option—against an unhedged baseline. The analysis will support a management decision that balances downside protection with economic efficiency.
 
 ---
 
 ## 2. Inputs (Known Variables)
 
-| Variable | Value | Unit | Source |
-|----------|-------|------|--------|
-| **Exposure amount** | 5,000,000 | EUR | Contract documentation |
-| **Payment date** | March 15, 2026 | Date | Contract documentation |
-| **Current spot rate** | 1.0850 | USD/EUR | Market data (Nov 6, 2025) |
-| **Days to maturity** | 129 | Days | Calculated |
-| **EUR interest rate** | 3.25% | % per annum | Eurozone interbank rate (ECB) |
-| **USD interest rate** | 4.75% | % per annum | US interbank rate (FRED) |
-| **Forward points** | -25 | Basis points | FX dealer quote |
-| **Call option premium** | 0.0180 | USD per EUR | Options market quote |
-| **Option strike price** | 1.0850 | USD/EUR | At-the-money (ATM) strike |
+| Variable | Description | Unit | Value | Source |
+|----------|-------------|------|-------|--------|
+| **FC_AMT** | EUR receivable amount | EUR | 5,000,000 | Contract documentation |
+| **PAY_DATE** | Payment due date | Date | March 15, 2026 | Contract documentation |
+| **DAYS** | Days to maturity | Days | 129 | Calculated from today |
+| **S0** | Current EUR/USD spot rate | USD/EUR | 1.0850 | Market data (Nov 6, 2025) |
+| **r_USD** | USD interest rate (p.a.) | % | 4.75 | US interbank rate (FRED) |
+| **r_EUR** | EUR interest rate (p.a.) | % | 3.25 | Eurozone interbank rate (ECB) |
+| **FWD_PTS** | Forward points | Basis points | -25 | FX dealer quote |
+| **K_CALL** | EUR call strike price | USD/EUR | 1.0850 | Set at current spot (ATM) |
+| **PREM_CALL** | EUR call option premium | USD/EUR | 0.0180 | Options market quote |
 
-All interest rates assume simple interest convention for consistency with short-term money market instruments. Transaction costs (e.g., bid-ask spreads, commissions) are excluded for analytical clarity but noted as a limitation.
+**Notes:**
+- All interest rates assume simple interest convention, actual/360 day-count
+- Forward points represent dealer quote for 129-day forward contract
+- EUR call option (equivalent to USD put) provides downside protection
+- Option premium is paid upfront in USD
 
 ---
 
 ## 3. Assumptions & Constraints
 
-- **Interest rate basis:** Simple interest, actual/360 day-count convention
-- **Forward rate calculation:** Interest rate parity holds; forward rate = spot × (1 + r_USD × days/360) / (1 + r_EUR × days/360)
-- **Money market execution:** Firm can borrow EUR and invest USD at quoted interbank rates with no credit spread
-- **Option mechanics:** European-style call option (exercisable only at maturity); premium paid upfront in USD
-- **No transaction costs:** Excludes bid-ask spreads, broker fees, and margin requirements
-- **Single scenario horizon:** Model evaluates outcomes at payment date only; no interim mark-to-market or early termination scenarios
-- **Tax neutrality:** Hedge gains/losses treated identically for tax purposes
+To ensure clarity and reproducibility, this analysis adopts the following conventions:
+
+1. **Interest rate basis:** Simple interest calculation using actual/360 day-count convention
+2. **Interest rate parity:** Forward rate derived from spot rate and interest rate differential; assumes market efficiency
+3. **Money market access:** Firm can borrow EUR and invest USD at quoted interbank rates without credit spread or margin requirements
+4. **Option structure:** European-style EUR call option exercisable only at maturity; premium paid upfront in USD
+5. **Exchange rate convention:** All rates expressed as USD per EUR (direct quote from US perspective)
+6. **Transaction costs excluded:** Analysis excludes bid-ask spreads, broker commissions, and administrative fees
+7. **Single evaluation date:** Outcomes measured only at payment date (March 15, 2026); no interim mark-to-market analysis
+8. **Tax neutrality:** Hedge gains and losses treated identically for corporate tax purposes
+9. **No credit risk:** Assumes all counterparties (banks, dealers) fulfill contractual obligations
+
+These assumptions allow for analytical clarity while noting that real-world implementation would require adjustment for transaction costs and credit considerations.
 
 ---
 
 ## 4. Calculation Flow
 
+The analysis follows a four-strategy comparison structure, each with distinct logic:
+
 ### **4.1 Forward Contract Hedge**
-1. Calculate forward rate using interest rate parity formula
-2. Lock in USD proceeds = EUR amount × forward rate
-3. Compare locked proceeds to unhedged outcome at various future spot rates
-4. Compute opportunity cost if EUR strengthens beyond forward rate
+1. Calculate forward rate using interest rate parity: multiply spot rate by the ratio of (1 + USD rate × days/360) to (1 + EUR rate × days/360)
+2. Compute locked-in USD proceeds by multiplying EUR amount by forward rate
+3. Compare locked proceeds against various future spot scenarios to illustrate certainty benefit
+4. Identify opportunity cost if EUR strengthens beyond the forward rate
 
 ### **4.2 Money Market Hedge**
-1. Determine present value of EUR receivable by discounting at EUR interest rate
-2. Borrow this PV amount in EUR today at EUR interest rate
-3. Convert borrowed EUR to USD at current spot rate
-4. Invest USD proceeds at USD interest rate until payment date
-5. At maturity: EUR receivable repays EUR loan principal + interest; USD investment matures
-6. Calculate net USD proceeds and compare to forward hedge
+1. Determine present value of EUR receivable by discounting at EUR interest rate for 129 days
+2. Borrow this PV amount in EUR at the EUR interest rate
+3. Convert borrowed EUR to USD immediately at current spot rate
+4. Invest converted USD at USD interest rate for 129 days
+5. At maturity: incoming EUR receivable repays EUR loan (principal plus interest); USD investment matures
+6. Calculate net USD proceeds and verify alignment with forward hedge (via IRP)
 
 ### **4.3 Currency Option Hedge**
-1. Purchase EUR call option (USD put) at ATM strike equal to current spot rate
-2. Pay upfront premium in USD (EUR amount × premium per unit)
-3. At maturity, evaluate intrinsic value:
-   - If spot > strike: exercise option, convert at strike rate
-   - If spot ≤ strike: let option expire, convert at spot rate
-4. Calculate net USD proceeds = conversion proceeds - option premium cost
+1. Purchase at-the-money EUR call option with strike equal to current spot rate (1.0850)
+2. Pay upfront premium of 0.0180 USD per EUR (total premium = EUR amount × unit premium)
+3. At maturity, evaluate option intrinsic value based on realized spot rate:
+   - If spot > strike: exercise option, convert EUR at strike rate
+   - If spot ≤ strike: let option expire, convert EUR at market spot rate (capture upside)
+4. Calculate net USD proceeds as conversion proceeds minus premium paid at initiation
 5. Determine breakeven spot rate where option hedge equals unhedged outcome
 
 ### **4.4 Unhedged Baseline**
-1. Convert EUR receivable at future spot rate on payment date
-2. USD proceeds = EUR amount × future spot rate
-3. Serves as benchmark for evaluating hedge effectiveness
+1. Convert EUR receivable at prevailing spot rate on March 15, 2026
+2. USD proceeds equal EUR amount multiplied by future spot rate
+3. Serves as performance benchmark and illustrates pure FX risk exposure
+
+**Sequencing note:** All calculations reference the same base inputs. Option and money market hedges are compared against the forward contract to assess relative value and trade-offs.
 
 ---
 
 ## 5. Outputs
 
-### **5.1 Summary Metrics Table**
-- **Hedged USD proceeds** for each strategy
-- **Effective exchange rate** (USD proceeds / EUR amount)
-- **Cost of hedge** (premium paid or opportunity cost vs. unhedged)
-- **Breakeven exchange rates** for option strategy
+The model will generate the following decision-support outputs:
 
-### **5.2 Scenario Analysis Table**
-- Future spot rates ranging from 1.0000 to 1.1500 (50-pip increments)
-- USD proceeds for each strategy at each spot rate
-- Best-performing strategy identified per scenario
+| Output | Description | Format | Purpose |
+|--------|-------------|--------|---------|
+| **USD_FORWARD** | Locked USD proceeds from forward | Numeric | Certainty benchmark |
+| **FWD_RATE** | Calculated forward exchange rate | Numeric | Validate IRP and dealer quote |
+| **USD_MM** | USD proceeds from money market hedge | Numeric | Cross-check vs. forward |
+| **USD_OPTION** | Net USD proceeds from option hedge | Table (by S_T) | Downside protection analysis |
+| **USD_UNHEDGED** | Unhedged USD proceeds | Table (by S_T) | Baseline comparison |
+| **BREAKEVEN_OPT** | Spot rate where option equals unhedged | Numeric | Decision threshold |
+| **SCENARIO_TABLE** | Comparative proceeds across spot scenarios | Table | Side-by-side evaluation |
+| **PAYOFF_CHART** | Hedge outcomes vs. future spot rate | Line chart | Visual strategy comparison |
+| **SUMMARY_TABLE** | Strategy ranking by criteria | Matrix | Executive decision support |
+| **RECOMMENDATION** | Written analysis with rationale | 2-3 paragraphs | CFO-ready summary |
 
-### **5.3 Visualizations**
-- **Payoff diagram:** Line chart showing USD proceeds (y-axis) vs. future spot rate (x-axis) for all four strategies
-- **Hedge effectiveness:** Bar chart comparing locked-in proceeds across strategies
-- **Downside protection comparison:** Highlighting floor values and upside participation
-
-### **5.4 Decision Matrix**
-- Rank strategies by: (1) downside protection, (2) cost efficiency, (3) flexibility
-- Management recommendation with supporting rationale
+**Visualization specifications:**
+- **Payoff chart:** X-axis shows future spot rates from 1.0000 to 1.1500; Y-axis shows USD proceeds; four lines (forward, money market, option, unhedged)
+- **Annotations:** Mark current spot, forward rate, and option breakeven point
+- **Decision matrix:** Rank strategies by downside protection, cost, and flexibility
 
 ---
 
 ## 6. Sensitivity Plan
 
-### **6.1 Exchange Rate Scenarios**
-Test model across 12 future spot rates (1.0000 to 1.1500 in 50-pip increments) to capture:
-- **Worst-case depreciation** (EUR weakens to 1.0000)
-- **Expected case** (forward rate as unbiased predictor)
-- **Best-case appreciation** (EUR strengthens to 1.1500)
+To assess hedge robustness across plausible FX scenarios, the model will test outcomes at varying future spot rates:
 
-### **6.2 Interest Rate Sensitivity**
-Secondary analysis: adjust EUR and USD rates by ±50 bps to assess impact on forward rate and money market hedge outcomes.
+### **6.1 Primary Scenario Analysis**
+- **Range:** Future spot rates (S_T) from 1.0000 to 1.1500 USD/EUR
+- **Increment:** 0.0050 (50 basis points)
+- **Total scenarios:** 11 discrete rate points
+- **Coverage:** Captures ~8% depreciation to ~6% appreciation from current spot
 
-### **6.3 Option Premium Sensitivity**
-Test option hedge viability if premium increases by 20% or 50% to reflect volatility shocks.
+**Scenario interpretation:**
+- **1.0000 (worst case):** EUR depreciates ~7.8% → tests downside protection
+- **1.0850 (neutral):** No change from current spot → baseline
+- **1.1500 (best case):** EUR appreciates ~6.0% → tests upside participation
 
-### **6.4 Visualization Approach**
-- **Primary chart:** Overlay all four strategies on single payoff diagram with future spot rate on x-axis (1.00–1.15) and USD proceeds on y-axis
-- **Annotation:** Mark forward rate, current spot, and breakeven points
-- **Color coding:** Distinct colors for each strategy with legend
+### **6.2 Secondary Sensitivities** (optional extensions)
+- **Interest rate shock:** Adjust r_USD and r_EUR by ±50 bps to test forward rate sensitivity
+- **Option premium variation:** Model option hedge if premium increases 20% or 50% (volatility spike scenario)
+- **Time decay:** Illustrate option value erosion if decision delayed by 30 days
+
+### **6.3 Visualization Approach**
+1. Generate table showing USD proceeds for all four strategies across 11 spot scenarios
+2. Create line chart overlaying all strategies with future spot on X-axis
+3. Highlight regions where each strategy dominates
+4. Add conditional formatting to identify optimal strategy per scenario
 
 ---
 
 ## 7. Limitations & Next Steps
 
-### **7.1 Limitations**
-- **Transaction costs excluded:** Real-world bid-ask spreads (typically 1-3 pips for EUR/USD) would reduce net proceeds by approximately $5,000-$15,000
-- **Counterparty risk ignored:** Model assumes dealers fulfill forward and option contracts without default
-- **Static analysis:** No consideration of dynamic hedging, portfolio effects, or hedging in tranches
-- **Simplified option structure:** American options, exotic structures (collars, range forwards), and volatility surfaces not evaluated
-- **Single time horizon:** Interim cash flow needs and mark-to-market P&L not modeled
+### **7.1 Analytical Limitations**
 
-### **7.2 Stage 3 Excel Build Preview**
-The Stage 3 deliverable will operationalize this specification by:
-1. Building a dynamic Excel model with input cells for all variables
-2. Implementing formulas for each calculation flow section
-3. Creating scenario analysis with data tables
-4. Generating publication-quality charts for the payoff diagram
-5. Adding conditional formatting to highlight optimal strategies by scenario
+This specification intentionally excludes certain factors to maintain analytical focus:
 
-This specification provides the blueprint for constructing a hedge evaluation tool that treasury can use for recurring FX exposures.
+- **Transaction costs:** Bid-ask spreads (typically 1-3 pips for EUR/USD) would reduce proceeds by approximately $5,000-$15,000; excluded for strategy comparison clarity
+- **Counterparty credit risk:** Assumes no dealer default; real hedges require credit assessment
+- **Dynamic hedging:** Static analysis at maturity only; no adjustment strategy or interim rebalancing
+- **Volatility surface:** Option pricing uses flat premium; actual pricing reflects strike and maturity structure
+- **Alternative structures:** Collars, range forwards, and participating forwards not evaluated
+- **Portfolio effects:** Single-transaction analysis; no consideration of natural hedges from other FX exposures
+- **Accounting treatment:** GAAP hedge accounting qualification not addressed
+
+### **7.2 Stage 3 Implementation Preview**
+
+The next phase will construct an Excel-based decision model that operationalizes this specification:
+
+1. **Input dashboard:** Centralized input cells for all variables in Section 2, enabling scenario updates
+2. **Calculation engine:** Formulas implementing each hedge type per Section 4 logic
+3. **Scenario generator:** Data table automatically computing proceeds across spot rate range
+4. **Visualization suite:** Dynamic charts updating with input changes
+5. **Decision output:** Summary table and recommendation text for management presentation
+
+This specification provides the complete technical blueprint for building a production-ready FX hedge evaluation tool that treasury can deploy for recurring foreign currency exposures.
 
 ---
 
